@@ -10,18 +10,59 @@
   (inf-w (OUT (*SUCC* x))))
 
 (defrec-lazy gen-char-table (depth curchar cont)
-  (if (isnil depth)
-    (cont curchar (*SUCC* curchar))
-    (do
-      (<- (_ cdr-depth) (depth))
-      (<- (left-tree curchar) (gen-char-table cdr-depth curchar))
-      (<- (right-tree curchar) (gen-char-table cdr-depth curchar))
-      (cont (cons left-tree right-tree) curchar))))
+  (cond
+    ((isnil depth)
+      (cont curchar (*SUCC* curchar)))
+    (t
+      (do
+        (<- (_ cdr-depth) (depth))
+        (<- (left-tree curchar) (gen-char-table cdr-depth curchar))
+        (<- (right-tree curchar) (gen-char-table cdr-depth curchar))
+        (cont (cons left-tree right-tree) curchar)))))
+
+(defrec-lazy lookup-char-table (curtable address)
+  (cond
+    ((isnil address)
+      curtable)
+    (t
+      (do
+        (<- (car-addr cdr-addr) (address))
+        (lookup-char-table (curtable car-addr) cdr-addr)))))
+
+(defrec-lazy add* (initcarry is-add n m cont)
+  (cond
+    ((isnil n)
+      (cont initcarry n))
+    (t
+      (do
+        (<- (car-m cdr-m) (m))
+        (<- (carry curlist) (add* initcarry is-add cdr-n cdr-m))
+        (let* not-carry (not carry))
+        (let* car-m (if is-add car-m (not car-m)))
+        (let* f (lambda (a b)
+          (if car-n
+            (if car-m a b)
+            (if car-m b a))))
+        (<- (curbit nextcarry)
+          ((lambda (cont)
+            (do
+              ((eval-bool (f car-m carry)))
+              (if (f carry not-carry)
+                (cont t)
+                (cont nil))))))
+        (cont nextcarry (cons curbit curlist))))))
+
+
+
+(def-lazy null-char ((+ 128 (succ 8)) *SUCC* W))
 
 (defun-lazy main (OUT *SUCC* W IN)
   (do
-    (<- (char-table curchar) (gen-char-table (list t t t t t t t t) ((+ 128 (succ 8)) *SUCC* W)))
-    (OUT (char-table t nil t nil t nil t t))))
+    (<- (char-table curchar) (gen-char-table (list t t t t t t t t) null-char))
+    (OUT (lookup-char-table char-table (list t nil t nil t nil t nil)))
+    (OUT (char-table t nil t nil t nil t t))
+    (OUT (char-table t nil t nil t nil t t))
+    ))
 
 (format t (compile-to-ml-lazy main))
 

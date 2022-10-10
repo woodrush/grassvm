@@ -23,6 +23,7 @@
 ;;===============================================================================
 (defparameter profile-index-depth nil)
 (defparameter lambdacraft-loaded t)
+(defparameter **error-on-undefined-var** t)
 
 (defun islambda (expr)
   (and (not (atom expr)) (atom (car expr)) (eq 'lambda (car expr))))
@@ -247,7 +248,9 @@
             (let ((i (position var (reverse env) :test #'equal)))
               (if i
                 (int-to-alphabet i)
-                (decorate-varname var)))))
+                (if **error-on-undefined-var**
+                  (lazy-error (format nil "Undefined variable ~a. Environment: ~a" var env))
+                  (decorate-varname var))))))
           (cond
             ((atom body)
               (lookup env body))

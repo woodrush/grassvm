@@ -35,6 +35,7 @@
       (cont initcarry n))
     (t
       (do
+        (<- (car-n cdr-n) (n))
         (<- (car-m cdr-m) (m))
         (<- (carry curlist) (add* initcarry is-add cdr-n cdr-m))
         (let* not-carry (not carry))
@@ -46,7 +47,7 @@
         (<- (curbit nextcarry)
           ((lambda (cont)
             (do
-              ((eval-bool (f car-m carry)))
+              ;; ((eval-bool (f car-m carry)))
               (if (f carry not-carry)
                 (cont t)
                 (cont nil))))))
@@ -54,15 +55,18 @@
 
 
 
-(def-lazy null-char ((+ 128 (succ 8)) *SUCC* W))
+(def-lazy null-primitive-char ((+ 128 (succ 8)) *SUCC* W))
 
 (defun-lazy main (OUT *SUCC* W IN)
   (do
-    (<- (char-table curchar) (gen-char-table (list t t t t t t t t) null-char))
-    (OUT (lookup-char-table char-table (list t nil t nil t nil t nil)))
-    (OUT (char-table t nil t nil t nil t t))
-    (OUT (char-table t nil t nil t nil t t))
-    ))
+    (<- (char-table curchar) (gen-char-table (list t t t t t t t t) null-primitive-char))
+    (let* n (list t nil t nil t nil t nil))
+    (let* char-zero (list t t t t t t t t))
+    (OUT (lookup-char-table char-table n))
+    (<- (n _) (add* nil t n char-zero))
+    (OUT (lookup-char-table char-table n))
+    (OUT (char-table t nil t nil t nil t t))))
+
 
 (format t (compile-to-ml-lazy main))
 

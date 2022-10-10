@@ -47,10 +47,10 @@
         (<- (curbit nextcarry)
           ((lambda (cont)
             (do
-              ;; ((eval-bool (f car-m carry)))
-              (if (f carry not-carry)
+              ((if (f carry not-carry)
                 (cont t)
-                (cont nil))))))
+                (cont nil))
+               (f car-m carry))))))
         (cont nextcarry (cons curbit curlist))))))
 
 
@@ -63,7 +63,7 @@
     (let* n (list t nil t nil t nil t nil))
     (let* char-zero (list t t t t t t t t))
     (OUT (lookup-char-table char-table n))
-    (<- (n _) (add* nil t n char-zero))
+    (<- (_ n) (add* nil t n char-zero))
     (OUT (lookup-char-table char-table n))
     (OUT (char-table t nil t nil t nil t t))))
 

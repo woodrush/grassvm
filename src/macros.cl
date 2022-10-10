@@ -8,10 +8,6 @@
 (defmacro-lazy cons (x y) `(lambda (f) (f ,x ,y)))
 
 (defun-lazy isnil (l) ((lambda (a) (a (lambda (v n x) nil) t)) l))
-(defmacro-lazy inflist (item)
-  `((lambda (x) (x x))
-    (lambda (self)
-      (cons ,item (self self)))))
 
 (defmacro-lazy not (x) `(,x nil t))
 (defmacro-lazy and (x y) `(,x ,y nil))
@@ -43,7 +39,8 @@
 (def-lazy 128 (* 2 64))
 (def-lazy 256 ((lambda (x) (x x)) 4))
 
-(defmacro-lazy if (x y z) `(,x ,y ,z))
+(defmacro-lazy if (x y z) `((,x (lambda (x) ,y) (lambda (x) ,z)) (lambda (x) x)))
+
 (defmacro-lazy let (argpairs body)
   ;; Syntax: (let ((x1 v1) (x2 v2) ...) body)
   (labels

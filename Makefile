@@ -3,12 +3,20 @@ STACK_BIN_PATH=~/.local/bin
 GRASS=bin/grass
 PLANT=bin/plant
 
-all: a.w
+SBCL=sbcl
 
-a.w: input.ml $(PLANT)
+all: out/a.w
+
+out/grassvm.ml: src/main.cl src/lambdacraft.cl
+	@mkdir -p out
+	@$(SBCL) --script $< > $@.tmp
+	@(printf 'let main _ = ('; cat $@.tmp; printf ') Out Succ w In') > $@
+	@rm $@.tmp
+
+out/a.w: out/grassvm.ml $(PLANT)
 	@$(PLANT) $< -o $@
 
-run: a.w $(GRASS)
+run: out/a.w $(GRASS)
 	@$(GRASS) $<
 
 build/Grassy/stack.yaml:

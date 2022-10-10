@@ -1,4 +1,4 @@
-(load "./lambdacraft.cl")
+(load "./src/lambdacraft.cl")
 
 (defun-lazy main (OUT SUCC W IN)
   (OUT W))

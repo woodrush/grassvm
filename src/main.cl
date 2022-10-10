@@ -1,14 +1,8 @@
 (load "./src/lambdacraft.cl")
 (load "./src/macros.cl")
 
-;; (def-lazy char-table
-;;   (cons
-;;     (cons ((+ 128 (succ 8)) *SUCC* W) (*SUCC* W))
-;;     (cons (2 *SUCC* W) ((succ 2) *SUCC* W))))
 
-(defrec-lazy inf-w (x)
-  (inf-w (OUT (*SUCC* x))))
-
+;; *SUCC* captured from `main`
 (defrec-lazy gen-char-table (depth curchar cont)
   (cond
     ((isnil depth)
@@ -29,26 +23,6 @@
         (<- (car-addr cdr-addr) (address))
         (lookup-char-table (curtable car-addr) cdr-addr)))))
 
-
-(defun-lazy getchar (_)
-  (do
-    (let* query (IN (lambda (x) nil)))
-    ;; Return nil for EOF
-    (if-then-return (not (query query))
-      nil)
-    ((letrec-lazy matchchar (curaddr)
-      (if (query (addr2char curaddr))
-        curaddr
-        (matchchar (inc-char curaddr))))
-     (list t t t t t t t t))))
-
-(defun-lazy putchar (c)
-  (OUT (lookup-char-table CHARTABLE c)))
-
-(defun-lazy inc-char (c)
-  (do
-    (<- (_ c) (add* nil t c (list t t t t t t t t)))
-    c))
 
 (defrec-lazy add* (initcarry is-add n m cont)
   (cond
@@ -75,15 +49,31 @@
         (cont nextcarry (cons curbit curlist))))))
 
 
+(defun-lazy inc-char (c)
+  (do
+    (<- (_ c) (add* nil t c (list t t t t t t t t)))
+    c))
+
 
 (def-lazy null-primitive-char ((+ 128 (succ 8)) *SUCC* W))
 (def-lazy char-zero (list t t t t t t t t))
 (defun-lazy main (OUT *SUCC* W IN)
   (do
     (<- (CHARTABLE _) (gen-char-table (list t t t t t t t t) null-primitive-char))
-    (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
-    (let* getchar getchar)
-    (let* putchar putchar)
+    (let* getchar (lambda (_)
+      (do
+        (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
+        (let* query (IN (lambda (x) nil)))
+        ;; Return nil for EOF
+        (if-then-return (not (query query))
+          nil)
+        ((letrec-lazy matchchar (curaddr)
+          (if (query (addr2char curaddr))
+            curaddr
+            (matchchar (inc-char curaddr))))
+        (list t t t t t t t t)))))
+    (let* putchar (lambda (c)
+      (OUT (lookup-char-table CHARTABLE c))))
     (let* n (getchar W))
     (putchar n)
     (<- (_ n) (add* nil t n char-zero))

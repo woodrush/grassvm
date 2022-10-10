@@ -424,6 +424,10 @@
 (defun to-lam (&rest args)
   (apply to-lam* args))
 
+(defparameter to-ml* (lambda-compiler-builder "(~a ~a)" "(~a ~a)" "(fun ~a -> ~a)"))
+(defun to-ml (&rest args)
+  (apply to-ml* args))
+
 ;; (defparameter to-js-arrow* (lambda-compiler-builder "~a(~a)" "(~a)(~a)" "(~a) => ~a"))
 ;; (defun to-js-arrow (&rest args)
 ;;   (apply to-js-arrow* args))
@@ -451,12 +455,18 @@
 (defun compile-to-lam (expr)
   (to-lam (curry expr)))
 
+(defun compile-to-ml (expr)
+  (to-ml (curry expr)))
+
 
 ;;================================================================
 ;; Utilities
 ;;================================================================
 ;; (defmacro compile-to-plaintext-lambda-lazy (expr-lazy)
 ;;   `(compile-to-plaintext-lambda (macroexpand-lazy ,expr-lazy)))
+
+(defmacro compile-to-ml-lazy (expr-lazy)
+  `(compile-to-ml (macroexpand-lazy ,expr-lazy)))
 
 (defmacro compile-to-lam-lazy (expr-lazy)
   `(compile-to-lam (macroexpand-lazy ,expr-lazy)))

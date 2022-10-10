@@ -76,16 +76,17 @@
   `(-> ,list (,n cdr*) car*))
 
 
+(def-lazy Z-comb
+  (lambda (f)
+    ((lambda (x) (f (lambda (y) (x x y))))
+     (lambda (x) (f (lambda (y) (x x y)))))))
+
 (defmacro-lazy letrec-lazy (name args body)
-  `(Y-comb (lambda (,name) (lambda ,args ,body))))
+  `(Z-comb (lambda (,name) (lambda ,args ,body))))
 
 (defmacro defrec-lazy (name args body)
   `(def-lazy ,name (letrec-lazy ,name ,args ,body)))
 
-(def-lazy Y-comb
-  (lambda (f)
-    ((lambda (x) (f (x x)))
-     (lambda (x) (f (x x))))))
 
 (defmacro-lazy -> (target &rest args)
   (if (not args)

@@ -3,11 +3,16 @@
 
 (def-lazy char-table
   (cons
-    (cons W (*SUCC* W))
+    (cons ((+ 128 (succ 8)) *SUCC* W) (*SUCC* W))
     (cons (2 *SUCC* W) ((succ 2) *SUCC* W))))
 
+(defrec-lazy inf-w (x)
+  (inf-w (OUT (*SUCC* x))))
+
 (defun-lazy main (OUT *SUCC* W IN)
-  (OUT (cdr (car char-table))))
+  ;; (OUT (char-table t t))
+  (inf-w W)
+  )
 
 (format t (compile-to-ml-lazy main))
 

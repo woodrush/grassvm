@@ -30,7 +30,7 @@
         (lookup-char-table (curtable car-addr) cdr-addr)))))
 
 
-(def-lazy getchar
+(defun-lazy getchar (_)
   (do
     (let* query (IN (lambda (x) nil)))
     ;; Return nil for EOF
@@ -42,6 +42,8 @@
         (matchchar (inc-char curaddr))))
      (list t t t t t t t t))))
 
+(defun-lazy putchar (c)
+  (OUT (lookup-char-table CHARTABLE c)))
 
 (defun-lazy inc-char (c)
   (do
@@ -75,19 +77,21 @@
 
 
 (def-lazy null-primitive-char ((+ 128 (succ 8)) *SUCC* W))
-
+(def-lazy char-zero (list t t t t t t t t))
 (defun-lazy main (OUT *SUCC* W IN)
   (do
     (<- (CHARTABLE _) (gen-char-table (list t t t t t t t t) null-primitive-char))
     (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
-    (let* char-table CHARTABLE)
-    ;; (let* n (list t nil t nil t nil t nil))
-    (let* n getchar)
-    (let* char-zero (list t t t t t t t t))
-    (OUT (lookup-char-table char-table n))
+    (let* getchar getchar)
+    (let* putchar putchar)
+    (let* n (getchar W))
+    (putchar n)
     (<- (_ n) (add* nil t n char-zero))
-    (OUT (lookup-char-table char-table n))
-    (OUT (char-table t nil t nil t nil t t))))
+    (putchar n)
+    (<- (_ n) (add* nil t n char-zero))
+    (putchar n)
+    (putchar n)
+    ))
 
 
 (format t (compile-to-ml-lazy main))

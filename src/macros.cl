@@ -82,7 +82,9 @@
      (lambda (x) (f (lambda (y) (x x y)))))))
 
 (defmacro-lazy letrec-lazy (name args body)
-  `(Z-comb (lambda (,name) (lambda ,args ,body))))
+  (if args
+    `(Z-comb (lambda (,name) (lambda ,args ,body)))
+    `(Z-comb (lambda (,name) ,body))))
 
 (defmacro defrec-lazy (name args body)
   `(def-lazy ,name (letrec-lazy ,name ,args ,body)))

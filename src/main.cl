@@ -29,6 +29,25 @@
         (<- (car-addr cdr-addr) (address))
         (lookup-char-table (curtable car-addr) cdr-addr)))))
 
+
+(def-lazy getchar
+  (do
+    (let* query (IN (lambda (x) nil)))
+    ;; Return nil for EOF
+    (if-then-return (not (query query))
+      nil)
+    ((letrec-lazy matchchar (curaddr)
+      (if (query (addr2char curaddr))
+        curaddr
+        (matchchar (inc-char curaddr))))
+     (list t t t t t t t t))))
+
+
+(defun-lazy inc-char (c)
+  (do
+    (<- (_ c) (add* nil t c (list t t t t t t t t)))
+    c))
+
 (defrec-lazy add* (initcarry is-add n m cont)
   (cond
     ((isnil n)
@@ -59,8 +78,11 @@
 
 (defun-lazy main (OUT *SUCC* W IN)
   (do
-    (<- (char-table curchar) (gen-char-table (list t t t t t t t t) null-primitive-char))
-    (let* n (list t nil t nil t nil t nil))
+    (<- (CHARTABLE _) (gen-char-table (list t t t t t t t t) null-primitive-char))
+    (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
+    (let* char-table CHARTABLE)
+    ;; (let* n (list t nil t nil t nil t nil))
+    (let* n getchar)
     (let* char-zero (list t t t t t t t t))
     (OUT (lookup-char-table char-table n))
     (<- (_ n) (add* nil t n char-zero))

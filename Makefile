@@ -15,7 +15,15 @@ out/rot13.ml: src/rot13.cl $(wildcard src/*.cl)
 out/rot13.w: out/rot13.ml $(PLANT)
 	$(PLANT) $< -o $@
 
-out/a.opt.w: out/grassvm.ml $(PLANT)
+out/main.ml: src/main.cl $(wildcard src/*.cl)
+	mkdir -p out
+	$(SBCL) --script $< > $@.tmp
+	mv $@.tmp $@
+
+out/main.w: out/main.ml $(PLANT)
+	$(PLANT) $< -o $@
+
+out/main.opt.w: out/main.ml $(PLANT)
 	$(PLANT) $< -O -o $@
 
 run: out/rot13.w $(GRASS)

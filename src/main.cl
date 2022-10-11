@@ -1,5 +1,4 @@
-(load "./src/lambdacraft.cl")
-(load "./src/macros.cl")
+(load "./src/yes.cl")
 
 
 ;; *SUCC* captured from `main`
@@ -57,6 +56,9 @@
 
 (def-lazy null-primitive-char ((+ 128 (succ 8)) *SUCC* W))
 (def-lazy char-zero (list t t t t t t t t))
+
+
+
 (defun-lazy main (OUT *SUCC* W IN)
   (do
     (<- (CHARTABLE _) (gen-char-table (list t t t t t t t t) null-primitive-char))
@@ -81,8 +83,9 @@
     (<- (_ n) (add* nil t n char-zero))
     (putchar n)
     (putchar n)
-    ))
+    (standalone nil)))
 
 
 (format t (compile-to-ml-lazy main))
+
 

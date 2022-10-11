@@ -141,8 +141,9 @@
   `(do* ,@(reverse proc)))
 
 (defmacro-lazy typematch-nil-cons (expr cons-args nil-case cons-case)
-  `(,expr
-     (lambda ,cons-args
-       (lambda (_) ,cons-case))
-     ,nil-case))
-
+  `(let ((__e__ ,expr))
+     (if (isnil __e__)
+      ,nil-case
+      (do
+        (<- ,cons-args (__e__))
+        ,cons-case))))

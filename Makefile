@@ -10,8 +10,7 @@ all: out/a.w
 out/grassvm.ml: src/main.cl $(wildcard src/*.cl)
 	mkdir -p out
 	$(SBCL) --script $< > $@.tmp
-	(printf 'let main _ = '; cat $@.tmp; printf ' Out Succ w In') > $@
-	rm $@.tmp
+	mv $@.tmp $@
 
 out/a.w: out/grassvm.ml $(PLANT)
 	$(PLANT) $< -o $@

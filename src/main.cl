@@ -36,7 +36,7 @@
 (def-lazy char-zero (list t t t t t t t t))
 
 
-(defun-lazy main (OUT *SUCC* W IN)
+(def-lazy main ;(OUT *SUCC* W IN)
   (do
     (let* char-zero char-zero)
     (let* add* add*)
@@ -63,9 +63,9 @@
     ;; (<- (_ n) (add* nil t n char-zero))
     ;; (putchar n)
     ;; (putchar n)
-    standalone))
+    (standalone nil)))
 
 
-(format t (compile-to-ml-lazy main))
+(format t "let main _ = ~a" (compile-to-ml-lazy main))
 
 

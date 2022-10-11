@@ -38,7 +38,17 @@
   (car (cdr (cdr expr))))
 
 (defun decorate-varname (var)
-  (concatenate 'string "[" (write-to-string var) "]"))
+  (cond
+    ((eq var 'OUT)
+      "Out")
+    ((eq var '*SUCC*)
+      "Succ")
+    ((eq var 'W)
+      "w")
+    ((eq var 'IN)
+      "In")
+    (t
+      (concatenate 'string "[" (write-to-string var) "]"))))
 
 (defun curry (expr)
   (labels
@@ -248,9 +258,19 @@
             (let ((i (position var (reverse env) :test #'equal)))
               (if i
                 (int-to-alphabet i)
-                (if **error-on-undefined-var**
-                  (lazy-error (format nil "Undefined variable ~a. Environment: ~a" var env))
-                  (decorate-varname var))))))
+                (cond
+                  ((eq var 'OUT)
+                    "Out")
+                  ((eq var '*SUCC*)
+                    "Succ")
+                  ((eq var 'W)
+                    "w")
+                  ((eq var 'IN)
+                    "In")
+                  (t
+                    (if **error-on-undefined-var**
+                      (lazy-error (format nil "Undefined variable ~a. Environment: ~a" var env))
+                      (decorate-varname var))))))))
           (cond
             ((atom body)
               (lookup env body))

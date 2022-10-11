@@ -25,31 +25,7 @@
         (lookup-char-table (curtable car-addr) cdr-addr)))))
 
 
-(defrec-lazy add* (initcarry is-add n m cont)
-  (cond
-    ((isnil n)
-      (cont initcarry n))
-    (t
-      (do
-        (<- (car-n cdr-n) (n))
-        (<- (car-m cdr-m) (m))
-        (<- (carry curlist) (add* initcarry is-add cdr-n cdr-m))
-        (let* not-carry (not carry))
-        (let* car-m (if is-add car-m (not car-m)))
-        (let* f (lambda (a b)
-          (if car-n
-            (if car-m a b)
-            (if car-m b a))))
-        (<- (curbit nextcarry)
-          ((lambda (cont)
-            (do
-              ((if (f carry not-carry)
-                (cont t)
-                (cont nil))
-               (f car-m carry))))))
-        (cont nextcarry (cons curbit curlist))))))
-
-
+;; add* defined in lambdavm.cl
 (defun-lazy inc-char (c)
   (do
     (<- (_ c) (add* nil t c (list t t t t t t t t)))
@@ -63,19 +39,21 @@
 (defun-lazy main (OUT *SUCC* W IN)
   (do
     (let* char-zero char-zero)
+    (let* add* add*)
+    (let* lookup-char-table lookup-char-table)
     (<- (CHARTABLE _) (gen-char-table char-zero null-primitive-char))
     (let* getchar (lambda (_)
       (do
         (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
         (let* query (IN (lambda (x) nil)))
+        (if-then-return (query query)
+          ((letrec-lazy matchchar (curaddr)
+            (if (query (addr2char curaddr))
+              curaddr
+              (matchchar (inc-char curaddr))))
+          char-zero))
         ;; Return char-zero for EOF
-        (if-then-return (not (query query))
-          char-zero)
-        ((letrec-lazy matchchar (curaddr)
-          (if (query (addr2char curaddr))
-            curaddr
-            (matchchar (inc-char curaddr))))
-        char-zero))))
+        char-zero)))
     (let* putchar (lambda (c)
       (OUT (lookup-char-table CHARTABLE c))))
     ;; (let* n (getchar W))
@@ -85,7 +63,7 @@
     ;; (<- (_ n) (add* nil t n char-zero))
     ;; (putchar n)
     ;; (putchar n)
-    (standalone nil)))
+    standalone))
 
 
 (format t (compile-to-ml-lazy main))

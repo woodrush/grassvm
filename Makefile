@@ -5,20 +5,20 @@ PLANT=bin/plant
 
 SBCL=sbcl
 
-all: out/a.w
+all: out/rot13.w
 
-out/grassvm.ml: src/main.cl $(wildcard src/*.cl)
+out/rot13.ml: src/rot13.cl $(wildcard src/*.cl)
 	mkdir -p out
 	$(SBCL) --script $< > $@.tmp
 	mv $@.tmp $@
 
-out/a.w: out/grassvm.ml $(PLANT)
+out/rot13.w: out/rot13.ml $(PLANT)
 	$(PLANT) $< -o $@
 
 out/a.opt.w: out/grassvm.ml $(PLANT)
 	$(PLANT) $< -O -o $@
 
-run: out/a.w $(GRASS)
+run: out/rot13.w $(GRASS)
 	$(GRASS) $<
 
 build/Grassy/stack.yaml:

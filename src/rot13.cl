@@ -1,5 +1,5 @@
 (load "./src/lambda-asm-header.cl")
-
+(load "./src/grassvm.cl")
 
 ;; Define your own register addresses
 (def-lazy reg-A (list t t))
@@ -111,10 +111,13 @@
 (def-lazy SYS-SUPPLEMENTARY-BITS 0)
 (def-lazy initial-memory nil)
 
-(def-lazy standalone
-  ;; All binary lambda calculus programs are functions that accept a string (stdin) and return a string.
-  (lambda (stdin)
-    (lambdaVM SYS-IO-BITS SYS-SUPPLEMENTARY-BITS initial-memory asm stdin)))
+(def-lazy standalone (lambdaVM SYS-IO-BITS SYS-SUPPLEMENTARY-BITS initial-memory asm nil))
+
+
+
+(def-main standalone)
+
+(format t "let main _ = ~a" (compile-to-ml-lazy main))
 
 
 ;; ;; The code is compilable to 3 languages, Binary Lambda Calculus, Universal Lambda, and Lazy K.

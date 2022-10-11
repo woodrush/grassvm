@@ -36,7 +36,8 @@
 (def-lazy char-zero (list t t t t t t t t))
 
 
-(def-lazy main ;(OUT *SUCC* W IN)
+;; The Grass primitive functions Out, Succ, w, In can be referenced in LambdaCraft as `OUT` `*SUCC*` `W` `IN`.
+(def-lazy main
   (do
     (let* char-zero char-zero)
     (let* add* add*)
@@ -56,16 +57,7 @@
         char-zero)))
     (let* putchar (lambda (c)
       (OUT (lookup-char-table CHARTABLE c))))
-    ;; (let* n (getchar W))
-    ;; (putchar n)
-    ;; (<- (_ n) (add* nil t n char-zero))
-    ;; (putchar n)
-    ;; (<- (_ n) (add* nil t n char-zero))
-    ;; (putchar n)
-    ;; (putchar n)
     (standalone nil)))
 
 
 (format t "let main _ = ~a" (compile-to-ml-lazy main))
-
-

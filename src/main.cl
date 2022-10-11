@@ -1,6 +1,6 @@
-(load "./src/yes.cl")
+;; (load "./src/yes.cl")
 ;; (load "./src/fizzbuzz.cl")
-;; (load "./src/rot13.cl")
+(load "./src/rot13.cl")
 
 
 ;; *SUCC* captured from `main`

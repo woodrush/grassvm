@@ -2,10 +2,11 @@
 GrassVM is a programmable virtual CPU for the [Grass](http://www.blue.sky.or.jp/grass/) programming language (also see [here](https://esolangs.org/wiki/Grass)).
 
 GrassVM supports an extended version of the [ELVM](https://github.com/shinh/elvm) instruction set and architecture written by [Shinichiro Hamaji](https://github.com/shinh).
-Using LambdaVM, you can enjoy assembly programming to write programs in the Grass programming language.
+Using GrassVM, you can enjoy assembly programming to write programs in the Grass programming language.
 
 GrassVM is based on [LambdaVM](https://github.com/woodrush/lambdavm) and [LambdaCraft](https://github.com/woodrush/lambdacraft).
 The implementation details for these projects are also available at the repos for [lambda-8cc](https://github.com/woodrush/lambda-8cc) and [LambdaLisp](https://github.com/woodrush/lambdalisp).
+
 
 ## How it Works
 ### Compilation Chain
@@ -16,16 +17,27 @@ The toolkit includes `grass` and `plant`.
 For example programs on `plant`, see [Grasspiler](https://github.com/susisu/Grasspiler) written also by [@susisu](https://github.com/susisu).
 
 LambdaVM is first compiled to the OCaml-like `plant` syntax using LambdaCraft.
-The output is a one-liner lambda term in the format `let main _ = fun x -> fun y -> ...` and is saved as `out/grassvm.ml`.
-For the reason why `main` takes an unused argument, see the language specs.
+The output is a one-liner lambda term in the format `let main _ = fun x -> fun y -> ...` and is saved as `out/rot13.ml`.
+For the reason why `main` takes an unused argument, please see the language specs.
 
 `out/grassvm.ml` is then compiled to Grass using `plant`.
-
 
 ### Evaluation Strategy
 The original [LambdaVM](https://github.com/woodrush/lambdavm) assumes a lazy evaluation strategy.
 On the other hand, Grass is an eagerly evaluated language as specified in the [language specs](http://www.blue.sky.or.jp/grass/) (in the "Intuitive explanation" section).
 Several modifications were made to let LambdaVM run in an eager evaluation strategy.
+
+### I/O Wrapper
+GrassVM first creates a binary tree that stores all of the 256 characters from 0 to 255.
+This structure is used to convert to and from Grass's primitive character object to a list of booleans.
+Using this structure, it defines the functions `putchar` and `getchar` which is later referenced inside LambdaVM.
+The definitions for these structures are written in [grassvm.cl](src/lambdavm.cl).
+
+### Source Codes
+The main source code for the virtual machine is [lambdavm.cl](src/lambdavm.cl).
+The I/O wrapper is written in [grassvm.cl](src/lambdavm.cl).
+The assembly listing is written in [rot13.cl](src/rot13.cl).
+For details on the assembly, please see the [LambdaVM](https://github.com/woodrush/lambdavm) repo.
 
 
 ## Example
@@ -50,11 +62,6 @@ $ bin/grass rot13.w  # Also runs as a REPL
 Hello, world!
 Uryyb, jbeyq!
 ```
-
-The main source code for the virtual machine is [lambdavm.cl](src/lambdavm.cl).
-The assembly listing is written in [rot13.cl](src/rot13.cl).
-For details on the assembly, please see the [LambdaVM](https://github.com/woodrush/lambdavm) repo.
-
 
 ## Build from Source
 ### Requirements

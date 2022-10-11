@@ -16,8 +16,21 @@ The toolkit includes `grass` and `plant`.
 `plant` is a Grass transpiler that transpiles an OCaml-style language to Grass.
 For example programs on `plant`, see [Grasspiler](https://github.com/susisu/Grasspiler) written also by [@susisu](https://github.com/susisu).
 
+### Having Lots of Fun
 LambdaVM is first compiled to the OCaml-like `plant` syntax using LambdaCraft.
-The output is a one-liner lambda term in the format `let main _ = fun x -> fun y -> ...` and is saved as `out/rot13.ml`.
+The output is a one-liner lambda term:
+
+```ocaml
+let main = (fun x -> fun y -> ((fun z -> ((fun a -> ((fun b -> (a (fun c -> (b b c)))) 
+(fun b -> (a (fun c -> (b b c)))))) (fun a -> fun b -> fun c -> fun d -> ((fun e -> ((
+fun f -> (f (fun g -> fun h -> fun i -> fun i -> fun k -> k) (fun g -> fun h -> g))) e
+)) b (fun e -> (d c (Succ c))) (fun e -> (b (fun f -> fun g -> (a g c (fun h -> fun c 
+-> (a g c (fun j -> fun c -> (d (fun l -> (l h j)) c)))))))) (fun e -> e))) z ((fun a 
+-> fun b -> ((fun a -> fun b -> ((fun a -> fun b -> (a (a b))) ((fun a -> fun b -> ((
+...
+```
+
+This file is saved as `out/rot13.ml`.
 For the reason why `main` takes an unused argument, please see the language specs.
 
 `out/grassvm.ml` is then compiled to Grass using `plant`.

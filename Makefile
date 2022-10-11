@@ -14,8 +14,10 @@ out/grassvm.ml: src/main.cl $(wildcard src/*.cl)
 	rm $@.tmp
 
 out/a.w: out/grassvm.ml $(PLANT)
-	# $(PLANT) $< -O -o $@
 	$(PLANT) $< -o $@
+
+out/a.opt.w: out/grassvm.ml $(PLANT)
+	$(PLANT) $< -O -o $@
 
 run: out/a.w $(GRASS)
 	$(GRASS) $<

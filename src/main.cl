@@ -7,4 +7,4 @@
   main)
 
 
-(format t "let main _ = ~a" (compile-to-ml-lazy GrassVM))
+(format t "let main = ~a" (compile-to-ml-lazy GrassVM))

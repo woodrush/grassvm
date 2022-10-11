@@ -21,13 +21,25 @@ out/main.ml: src/main.cl $(wildcard src/*.cl)
 	mv $@.tmp $@
 
 out/main.w: out/main.ml $(PLANT)
-	$(PLANT) $< -o $@
-
-out/main.opt.w: out/main.ml $(PLANT)
 	$(PLANT) $< -O -o $@
 
 run: out/rot13.w $(GRASS)
 	$(GRASS) $<
+
+out/putchar.ml: examples/putchar.cl $(wildcard src/*.cl)
+	mkdir -p out
+	$(SBCL) --script $< > $@.tmp
+	mv $@.tmp $@
+
+out/putchar.asm.w: out/putchar.ml $(PLANT)
+	$(PLANT) $< -O -o $@
+
+out/asm-standalone.w: out/main.w examples/asm.w
+	cat $^ > $@
+
+run-asm: out/asm-standalone.w
+	$(GRASS) $<
+
 
 build/Grassy/stack.yaml:
 	mkdir -p build

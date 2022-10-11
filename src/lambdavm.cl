@@ -22,6 +22,7 @@
 ;; SOFTWARE.
 ;;===============================================================================
 (load "./src/lambdacraft.cl")
+(load "./src/blc-numbers.cl")
 (load "./src/macros.cl")
 
 
@@ -275,26 +276,23 @@
   ;;   exit: (cons4 inst-io nil         nil   io-exit)
   ;; For `exit`, the control flow depends on the second term, so it must be set to `nil`.
   ;; Typematch over the inst. type
-  (*dst
+  ((*dst
     ;; getc
-    (do
-      (<- (c stdin)
-        ((lambda (return)
-          (typematch-nil-cons stdin (car-stdin cdr-stdin)
-            ;; nil case
-            (return int-zero stdin)
-            ;; cons case
-            (return (io-bitlength-to-wordsize car-stdin) cdr-stdin)))))
-      (regwrite *src c)               ;; Implicit parameter passing: reg
-      (eval memory stdin nextblock curproglist))
+    (lambda (x)
+      (do
+        (regwrite *src (getchar (lambda (x) x)))               ;; Implicit parameter passing: reg
+        (eval memory stdin nextblock curproglist)))
     ;; putc
-    (do
-      (putchar (wordsize-to-io-bitlength src))
-      (eval-reg reg)
-      ;; (cons (wordsize-to-io-bitlength src) (eval-reg reg))
-      )
+    (lambda (x)
+      (do
+        (putchar (wordsize-to-io-bitlength src))
+        (eval-reg reg)
+        ;; (cons (wordsize-to-io-bitlength src) (eval-reg reg))
+        ))
     ;; exit
-    src-is-imm)) ;; always evaluates to nil
+    (lambda (x)
+      src-is-imm)) ;; always evaluates to nil
+   (lambda (x) x)))
 
 (defrec-lazy list2tree** (l depth cont)
   (typematch-nil-cons l (_ _)

@@ -1,4 +1,6 @@
 (load "./src/yes.cl")
+;; (load "./src/fizzbuzz.cl")
+;; (load "./src/rot13.cl")
 
 
 ;; *SUCC* captured from `main`
@@ -58,31 +60,31 @@
 (def-lazy char-zero (list t t t t t t t t))
 
 
-
 (defun-lazy main (OUT *SUCC* W IN)
   (do
-    (<- (CHARTABLE _) (gen-char-table (list t t t t t t t t) null-primitive-char))
+    (let* char-zero char-zero)
+    (<- (CHARTABLE _) (gen-char-table char-zero null-primitive-char))
     (let* getchar (lambda (_)
       (do
         (let* addr2char (lambda (addr) (lookup-char-table CHARTABLE addr)))
         (let* query (IN (lambda (x) nil)))
-        ;; Return nil for EOF
+        ;; Return char-zero for EOF
         (if-then-return (not (query query))
-          nil)
+          char-zero)
         ((letrec-lazy matchchar (curaddr)
           (if (query (addr2char curaddr))
             curaddr
             (matchchar (inc-char curaddr))))
-        (list t t t t t t t t)))))
+        char-zero))))
     (let* putchar (lambda (c)
       (OUT (lookup-char-table CHARTABLE c))))
-    (let* n (getchar W))
-    (putchar n)
-    (<- (_ n) (add* nil t n char-zero))
-    (putchar n)
-    (<- (_ n) (add* nil t n char-zero))
-    (putchar n)
-    (putchar n)
+    ;; (let* n (getchar W))
+    ;; (putchar n)
+    ;; (<- (_ n) (add* nil t n char-zero))
+    ;; (putchar n)
+    ;; (<- (_ n) (add* nil t n char-zero))
+    ;; (putchar n)
+    ;; (putchar n)
     (standalone nil)))
 
 

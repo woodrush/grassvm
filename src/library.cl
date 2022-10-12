@@ -16,6 +16,13 @@
     reg-D
     reg-SP
     reg-BP
+
+    cmp-gt
+    cmp-lt
+    cmp-eq
+    cmp-le
+    cmp-ge
+    cmp-ne
 ))
 
 

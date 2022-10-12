@@ -40,7 +40,9 @@
 (def-lazy GrassVMCore
   (MemlistBuilder
     (lambda (memlist)
-      (ProglistBuilder (GrassVM memlist) nil nil))
+      (ProglistBuilder
+        (lambda (proglist)
+          (lambda (x) (GrassVM memlist proglist))) nil nil))
     nil))
 
 ;; (def-lazy standalone

@@ -44,14 +44,10 @@ run-asm: out/asm-standalone.w $(GRASS_ML)
 
 build/grass.ml:
 	mkdir -p build
-	wget http://panathenaia.halfmoon.jp/alang/grass/grass.ml
-
-ocamlc-env:
-	opam switch create 3.09.3
-	eval $(opam env --switch=3.09.3)
+	cd build; git clone https://gist.github.com/woodrush/3d85a6569ef3c85b63bfaf9211881af6
+	cd build; cp 3d85a6569ef3c85b63bfaf9211881af6/grass.ml .
 
 $(GRASS_ML): build/grass.ml
-	# If compilation fails, try running `make ocamlc-env` to use an older version of ocamlc
 	ocamlc -o $@ $<
 
 build/Grassy/stack.yaml:

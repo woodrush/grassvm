@@ -50,6 +50,8 @@
     t t t t  t t t t  t t t t  t t t t  t nil t t t t nil t
     nil
     ;; proglist
+    (cons4 inst-jmp t (list t t t t  t t t t  t t t t  t t t t  t t t t t t t t) nil)
+    nil
     (cons4 inst-io nil (list t) io-putc)
     (cons4 inst-load t (list t t t t  t t t t  t t t t  t t t t  t t t t t t t t) (list t))
     nil

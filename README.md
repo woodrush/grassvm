@@ -65,6 +65,9 @@ The I/O wrapper is written in [grassvm.cl](src/lambdavm.cl).
 The assembly listing is written in [rot13.cl](src/rot13.cl).
 For details on the assembly, please see the [LambdaVM](https://github.com/woodrush/lambdavm) repo.
 
+### Further Details
+Further implementation details are explained in the [Implementation Details](#implementation-details) section.
+
 
 ## Usage
 ### Requirements
@@ -99,3 +102,104 @@ $ bin/grass rot13.w  # Also runs as a REPL
 Hello, world!
 Uryyb, jbeyq!
 ```
+
+## Implementation Details
+### The Memory and Program Builder
+GrassVM is based on [LambdaVM](https://github.com/woodrush/lambdavm).
+LambdaVM accepts a memory list and program list, each expressed as a list of 24-bit integers
+and a list of lists of instructions.
+[rot13.cl](src/rot13.cl) builds these lists as built-in lambda terms compiled by LambdaCraft and `plant`.
+
+To build these lists in the [ELVM Grass backend](https://github.com/woodrush/elvm/blob/grass-backend/target/w.c), the Grass source code for buildign these lists
+must be generated in the C source code of ELVM.
+To make this easy, GrassVM uses a stack machine which I named as the memory builder and program builder.
+
+The memory and program builders are defined as follows in [main.cl](src/main.cl) as `MemlistBuilder` and `ProglistBuilder`.
+
+#### Memory Builder
+`MemlistBuilder` is a state machine that behaves as follows:
+
+- It maintains the state `curlist` and accepts the input argument `option`.
+  - When `option` is `t`, it returns a function that accepts 24 arguments.
+    The arguments are packed into a cons list with 24 elements, and pushed to `MemlistBuilder`'s internal state `curlist`.
+    A new closure of `MemlistBuilder` with an updated `curlist` is then returned.
+  - When `option` is `nil`, it applies `curlist` to `cont` and returns its result.
+
+Since `MemlistBuilder` pushes its incoming item on top of the stack as `(cons next curlist)`,
+the integers must be pushed to `MemlistBuilder` in reverse order when creating the list.
+The ELVM Grass backend therefore reverses the memory list first when emitting the memory initialization clauses.
+
+#### Program Builder
+`ProglistBuilder` is a state machine that behaves as follows:
+
+- It maintains the states `curlist` and `curtag`, each representing the tag list (the entire program) and the instruction list of the current program counter. It accepts an input `input`.
+  - When `input` is a 4-tuple, i.e., it is a [LambdaVM instruction](https://github.com/woodrush/lambdavm#instruction-structure),
+    - It pushes the instruction to the top of `curtag`, and returns a new closure of `ProglistBuilder` with an updated `curtag`.
+  - When `input` is `nil`,
+    - And when `curtag` is not `nil` and is a cons cell, it pushes `curtag` on top of `curlist`, and returns a new closure of `ProglistBuilder` with an updated `curlist`.
+    This has the effect of incrementing the program counter.
+    - When `curtag` is also `nil`, it applies `curlist` to `cont` and returns its result.
+    This has the effect of finishing the program list construction, and extracting the constructed program list.
+
+Similar to `MemlistBuilder`, `ProglistBuilder` also pushes its incoming instruction and tag on top of the stack as `(cons next curlist)`.
+Therefore, the instructions must be pushed in reverse order when creating the list.
+The ELVM Grass backend therefore reverses the instruction list first when emitting the program list.
+
+
+### Self Application Specification
+The memory and program builders are combined with GrassVM in main.cl as follows:
+
+```lisp
+(def-lazy GrassVMCore
+  (MemlistBuilder
+    (lambda (memlist)
+      (ProglistBuilder
+        (lambda (proglist)
+          (lambda (x) (GrassVM memlist proglist))) nil nil))
+    nil))
+```
+
+`GrassVMCore` first exposes `MemlistBuilder` to build the memory initialization clauses.
+When the memory initialization finishes, it then exposes `ProglistBuilder` to build the program initialization clauses.
+When both of the builders finish, it returns the object `(lambda (x) (GrassVM memlist proglist))`,
+encapsulating a standalone `GrassVM` applied with `memlist` and `proglist` thus making it ready to run.
+
+The reason why `GrassVM` is contained in a lambda `(lambda (x) ...)` is because of the self-application specification of the Grass language.
+In Grass, it is specified that when the interpreter encounters the final `v` definition clause in the program,
+it takes the object at the top of the stack and calls it with the object itself as the argument.
+After finishing building the memory and program, the object `(lambda (x) (GrassVM memlist proglist))`
+is left at the top of the stack.
+The interpreter therefore applies this object to itself to start the main execution phase.
+This exposes the closure `(GrassVM memlist proglist)` to the execution region,
+thus starting the execution of the program loaded to GrassVM.
+
+
+### ELVM Implementation
+Grass is a stack-based language. When a new value is created via function application,
+the result is pushed to the top of the environment stack.
+Due to the designs of the memory and program builder, after each integer or instruction is pushed to the builder functions,
+the new closure is pushed to the top of the stack.
+This makes writing raw Grass code for building the memory and programs easy, since the VM always stays at the top of the stack before pushing another integer or instruction.
+
+Since all of the necessary Grass primitive function references are already contained inside the VM,
+the ELVM implementation can forget about the total depth of the stack, so it suffices to only track the relative position of the VM within the environment stack.
+
+
+### Refining the Interpreter
+GrassVM is tested using the interpreter [grass.ml](https://gist.github.com/woodrush/3d85a6569ef3c85b63bfaf9211881af6),
+originally written by [@ytomino](https://github.com/ytomino) and modified by [@youz](https://github.com/youz) and [@woodrush](https://github.com/woodrush).
+Here are the modifications made from the original implementation:
+
+- Let the program compile on a newer version of ocamlc (by @youz)
+  - This is done in [this revision](https://gist.github.com/woodrush/3d85a6569ef3c85b63bfaf9211881af6/revisions#diff-d45429b677faa4e32367de9accb2bb897144711a89ec8346165f896827cd52f8R125).
+- Fix the behavior of the Grass primitive `In` (by @woodrush)
+  - The original interpreter throws an error when a non-character object is passed to `In`.
+    On the other hand, the [Grass language specs](http://www.blue.sky.or.jp/grass/) specify that:
+    - `In` can accept non-character objects.
+    - `In` returns the Grass character object matching the standard input when the standard input is not EOF.
+    - When the standard input is EOF, `In` returns its argument as is, i.e., it behaves as the identity function.
+  - The interpreter is fixed so that these specifications are met, instead of throwing an error.
+- Flush the output every time when `Out` is called
+  - Originally, the output was only flushed when a newline was printed.
+    This makes programs such as [lisp.c](https://github.com/shinh/elvm/blob/master/test/lisp.c) in the ELVM repository not print the `> ` prompt until the user finishes typing their input, 
+    since lisp.c doesn't print a newline until the user presses return.

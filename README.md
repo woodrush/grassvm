@@ -103,6 +103,14 @@ Hello, world!
 Uryyb, jbeyq!
 ```
 
+### Building the GrassVM Core in the ELVM Grass Backend
+To build the variable `GRASS_VM` in [wcore.h](https://github.com/woodrush/elvm/blob/grass-backend/target/wcore.h)
+from the ELVM Grass backend, run:
+
+```sh
+make out/main.w
+```
+
 ## Implementation Details
 ### The Memory and Program Builder
 GrassVM is based on [LambdaVM](https://github.com/woodrush/lambdavm).

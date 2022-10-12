@@ -21,8 +21,11 @@ out/main.ml: src/main.cl $(wildcard src/*.cl)
 	$(SBCL) --script $< > $@.tmp
 	mv $@.tmp $@
 
-out/main.w: out/main.ml $(PLANT)
+out/main.w.tmp: out/main.ml $(PLANT)
 	$(PLANT) $< -O -o $@
+
+out/main.w: out/main.w.tmp
+	cat $< | sed -e 's/\(..............................................................................\)/"\1"\n/g' > $@
 
 run: out/rot13.w $(GRASS_ML)
 	$(GRASS_ML) $<

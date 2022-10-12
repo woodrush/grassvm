@@ -35,6 +35,7 @@
   `(def-lazy main
     (do
       (let* char-zero char-zero)
+      (let* null-primitive-char null-primitive-char)
       (<- (CHARTABLE _) (gen-char-table char-zero null-primitive-char))
       (let* getchar (lambda (_)
         (do

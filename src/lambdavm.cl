@@ -280,15 +280,13 @@
     ;; getc
     (lambda (x)
       (do
-        (regwrite *src (getchar (lambda (x) x)))               ;; Implicit parameter passing: reg
+        (regwrite *src (io-bitlength-to-wordsize (getchar x)))
         (eval memory stdin nextblock curproglist)))
     ;; putc
     (lambda (x)
       (do
         (putchar (wordsize-to-io-bitlength src))
-        (eval-reg reg)
-        ;; (cons (wordsize-to-io-bitlength src) (eval-reg reg))
-        ))
+        (eval-reg reg)))
     ;; exit
     (lambda (x)
       src-is-imm)) ;; always evaluates to nil

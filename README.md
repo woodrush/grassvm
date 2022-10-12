@@ -8,6 +8,48 @@ GrassVM is based on [LambdaVM](https://github.com/woodrush/lambdavm) and [Lambda
 The implementation details for these projects are also available at the repos for [lambda-8cc](https://github.com/woodrush/lambda-8cc) and [LambdaLisp](https://github.com/woodrush/lambdalisp).
 
 
+## Usage
+### Requirements
+- [stack](https://docs.haskellstack.org/en/stable/), the Haskell Tool Stack (2.9.1)
+- [SBCL](https://www.sbcl.org/) (2.1.11.debian)
+
+### Build Instructions
+This will build [rot13.w](https://gist.github.com/woodrush/360a4e741e40084b34ecfe3aa9e00c95) (without the newline pretty printing):
+
+```sh
+make
+```
+
+This will build the file `out/rot13.w`.
+This will take several minutes.
+
+Note that running `make` will also install `grass` and `plant`
+under the location specified by `stack`.
+The Makefile assumes `~/.local/bin` as the installation location,
+specified with the configuration `STACK_BIN_PATH=~/.local/bin`.
+If `make` fails finding `grass` and `plant`, try changing this configuration.
+
+`out/rot13.w` can be run as:
+
+```sh
+$ make bin/grass
+$ echo 'Hello, world!' | bin/grass rot13.w
+Uryyb, jbeyq!
+$ echo 'Uryyb, jbeyq!' | bin/grass rot13.w
+Hello, world!
+$ bin/grass rot13.w  # Also runs as a REPL
+Hello, world!
+Uryyb, jbeyq!
+```
+
+### Building the GrassVM Core in the ELVM Grass Backend
+To build the variable `GRASS_VM` in [wcore.h](https://github.com/woodrush/elvm/blob/grass-backend/target/wcore.h)
+from the ELVM Grass backend, run:
+
+```sh
+make out/main.w
+```
+
 ## How it Works
 ### Compilation Chain
 GrassVM's compilation chain is based on [@susisu](https://github.com/susisu)'s [Grassy](https://github.com/susisu/Grassy) toolkit.
@@ -53,51 +95,7 @@ The I/O wrapper is written in [grassvm.cl](src/lambdavm.cl).
 The assembly listing is written in [rot13.cl](src/rot13.cl).
 For details on the assembly, please see the [LambdaVM](https://github.com/woodrush/lambdavm) repo.
 
-### Further Details
-Further implementation details are explained in the [Implementation Details](#implementation-details) section.
 
-
-## Usage
-### Requirements
-- [stack](https://docs.haskellstack.org/en/stable/), the Haskell Tool Stack (2.9.1)
-- [SBCL](https://www.sbcl.org/) (2.1.11.debian)
-
-### Build Instructions
-This will build [rot13.w](https://gist.github.com/woodrush/360a4e741e40084b34ecfe3aa9e00c95) (without the newline pretty printing):
-
-```sh
-make
-```
-
-This will build the file `out/rot13.w`.
-This will take several minutes.
-
-Note that running `make` will also install `grass` and `plant`
-under the location specified by `stack`.
-The Makefile assumes `~/.local/bin` as the installation location,
-specified with the configuration `STACK_BIN_PATH=~/.local/bin`.
-If `make` fails finding `grass` and `plant`, try changing this configuration.
-
-`out/rot13.w` can be run as:
-
-```sh
-$ make bin/grass
-$ echo 'Hello, world!' | bin/grass rot13.w
-Uryyb, jbeyq!
-$ echo 'Uryyb, jbeyq!' | bin/grass rot13.w
-Hello, world!
-$ bin/grass rot13.w  # Also runs as a REPL
-Hello, world!
-Uryyb, jbeyq!
-```
-
-### Building the GrassVM Core in the ELVM Grass Backend
-To build the variable `GRASS_VM` in [wcore.h](https://github.com/woodrush/elvm/blob/grass-backend/target/wcore.h)
-from the ELVM Grass backend, run:
-
-```sh
-make out/main.w
-```
 
 ## Implementation Details
 ### The Memory and Program Builder
@@ -242,7 +240,7 @@ Here are the modifications made from the original implementation:
 - Let the program compile on a newer version of ocamlc (by [@youz](https://github.com/youz))
   - This is done in [this revision](https://gist.github.com/woodrush/3d85a6569ef3c85b63bfaf9211881af6/revisions#diff-d45429b677faa4e32367de9accb2bb897144711a89ec8346165f896827cd52f8R125).
 - Fix the behavior of the Grass character primitive (by [@youz](https://github.com/youz))
-  - This is documented in [this blog entry](https://youz.hatenablog.com/entry/2020/05/04/204707) (in Japanese) by @youz.
+  - This is documented at the last section in [this blog entry](https://youz.hatenablog.com/entry/2020/05/04/204707) (in Japanese) by @youz.
   - The original interpreter throws an error when a non-character object is passed to character primitives.
     On the other hand, the [Grass language specs](http://www.blue.sky.or.jp/grass/) specify that `False` is returned in this case.
     The modified version fixes this issue.

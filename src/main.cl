@@ -43,4 +43,14 @@
       (ProglistBuilder (GrassVM memlist) nil nil))
     nil))
 
-(format t "let main = ~a" (compile-to-ml-lazy GrassVMCore))
+(def-lazy standalone
+  (GrassVMcore
+    ;; memlist
+    nil
+    ;; proglist
+    (cons4 inst-io t (list t t t t  t t t t  t t t t  t t t t  t nil t t t t t nil) io-putc)
+    nil
+    nil
+    ))
+;; (format t "let main = ~a" (compile-to-ml-lazy GrassVMCore))
+(format t "let main = ~a" (compile-to-ml-lazy standalone))

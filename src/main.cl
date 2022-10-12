@@ -1,7 +1,7 @@
 (load "./src/lambdavm.cl")
 (load "./src/grassvm.cl")
 
-(def-main (LambdaVM 8 16 memlist proglist nil))
+(def-main (LambdaVM 8 16 memlist proglist))
 
 (defun-lazy GrassVM (memlist proglist)
   main)

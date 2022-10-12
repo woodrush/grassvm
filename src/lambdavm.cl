@@ -158,13 +158,13 @@
   `(,expr (lambda (a b) t) (lambda (a) a) (lambda (a) t) nil))
 
 
-(defrec-lazy eval (memory stdin curblock curproglist reg)
+(defrec-lazy eval (memory curblock curproglist reg)
   (do
     (let* jumpto
       (lambda (jmp)
         (do
           (<- (proglist) (lookup-tree* progtree jmp))
-          ((proglist (eval memory stdin)) reg))))
+          ((proglist (eval memory)) reg))))
     (let* regwrite (memory-write* reg))
     (let* regread (lookup-tree* reg))
     (cond
@@ -173,11 +173,11 @@
           ;; nil case
           curproglist
           ;; cons case
-          ((curproglist (eval memory stdin)) reg)))
+          ((curproglist (eval memory)) reg)))
       (t
         (do
           (<- (curinst nextblock) (curblock))
-          (let* eval-reg (eval memory stdin nextblock curproglist))
+          (let* eval-reg (eval memory nextblock curproglist))
           (<- (inst-type src-is-imm *src) (curinst)) ;; Delayed destruction: *dst
           (<- (src) (lookup-src-if-imm* src-is-imm *src))
           (lambda (*dst)
@@ -233,7 +233,7 @@
   (((regread *dst
       (memory-write* memory src))
      eval)
-   stdin nextblock curproglist reg))
+   nextblock curproglist reg))
 
 (def-lazy mov-case
   ;; Instruction structure:: (cons4 inst-mov [src-isimm] [src] [dst])
@@ -281,7 +281,7 @@
     (lambda (x)
       (do
         (regwrite *src (io-bitlength-to-wordsize (getchar x)))
-        (eval memory stdin nextblock curproglist)))
+        (eval memory nextblock curproglist)))
     ;; putc
     (lambda (x)
       (do
@@ -316,7 +316,7 @@
 (def-lazy initreg nil)
 
 (defmacro def-lambdaVM ()
-  `(defun-lazy lambdaVM (io-bitlength supp-bitlength memlist proglist stdin)
+  `(defun-lazy lambdaVM (io-bitlength supp-bitlength memlist proglist)
     (do
       ;; Share references to functions to prevent them from being inlined multiple times
       (let* int-zero
@@ -333,18 +333,17 @@
       (let* memory-write* memory-write*)
       (let* lookup-tree* lookup-tree*)
       ;; Implicit parameter passing of memtree and progtree:
-      ;; ((proglist (eval memtree stdin)) initreg)
+      ;; ((proglist (eval memtree)) initreg)
       ((proglist
-        (((do
-            (let* list2tree*
-              (lambda (l cont)
-                (do
-                  (<- (tree _) (list2tree** l int-zero))
-                  (cont tree))))
-            (<- (progtree) (list2tree* (cdr-generator proglist)))
-            (list2tree* memlist) ;; Implicit argument passing: memtree
-            (eval)))
-        stdin))
+        ((do
+          (let* list2tree*
+            (lambda (l cont)
+              (do
+                (<- (tree _) (list2tree** l int-zero))
+                (cont tree))))
+          (<- (progtree) (list2tree* (cdr-generator proglist)))
+          (list2tree* memlist) ;; Implicit argument passing: memtree
+          (eval))))
       initreg))))
 
 (def-lambdaVM)

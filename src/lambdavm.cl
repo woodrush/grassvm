@@ -70,12 +70,6 @@
         (cont (cons memory-rewritten memory-orig))
         (cont (cons memory-orig memory-rewritten))))))
 
-(defmacro-lazy eval-bool (expr)
-  `(lambda (cont)
-    (if ,expr
-      (cont t)
-      (cont nil))))
-
 (defrec-lazy add* (initcarry is-add n m cont)
   (typematch-nil-cons n (car-n cdr-n)
     ;; nil case
@@ -93,10 +87,10 @@
       (<- (curbit nextcarry)
         ((lambda (cont)
           (do
-            ((eval-bool (f car-m carry)))
-            (if (f carry not-carry)
+            ((if (f carry not-carry)
               (cont t)
-              (cont nil))))))
+              (cont nil))
+              (f car-m carry))))))
       (cont nextcarry (cons curbit curlist)))))
 
 

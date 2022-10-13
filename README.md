@@ -16,6 +16,9 @@ The compiled Grass program [lisp.w](https://gist.github.com/woodrush/25372fe1c4b
 Instead of writing C, you can hand-assemble Grass programs using the contents of this repo.
 
 
+### Grass Programming Tips
+I've documented tips on writing raw Grass programs in [grass-tips.md](grass-tips.md).
+
 ## Usage
 ### Requirements
 - [stack](https://docs.haskellstack.org/en/stable/), the Haskell Tool Stack (2.9.1)

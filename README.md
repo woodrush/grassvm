@@ -127,7 +127,7 @@ LambdaVM accepts a memory list and program list, each expressed as a list of 24-
 and a list of lists of instructions.
 [rot13.cl](src/rot13.cl) builds these lists as built-in lambda terms compiled by LambdaCraft and `plant`.
 
-To build these lists in the [ELVM Grass backend](https://github.com/woodrush/elvm/blob/grass-backend/target/w.c), the Grass source code for buildign these lists
+To build these lists in the [ELVM Grass backend](https://github.com/woodrush/elvm/blob/grass-backend/target/w.c), the Grass source code for building these lists
 must be generated in the C source code of ELVM.
 To make this easy, GrassVM uses a stack machine which I named as the memory builder and program builder.
 

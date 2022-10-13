@@ -216,7 +216,7 @@ The memory and program builders are combined with GrassVM in main.cl as follows:
 
 `GrassVMCore` first exposes `MemlistBuilder` to build the memory initialization clauses.
 When the memory initialization finishes, it then exposes `ProglistBuilder` to build the program initialization clauses.
-When both of the builders finish, it returns the object `(lambda (x) (GrassVM memlist proglist))`,
+When `ProglistBuilder` finishes running, it returns the object `(lambda (x) (GrassVM memlist proglist))`,
 encapsulating a standalone `GrassVM` applied with `memlist` and `proglist` thus making it ready to run.
 
 The reason why `GrassVM` is contained in a lambda `(lambda (x) ...)` is because of the self-application specification of the Grass language.

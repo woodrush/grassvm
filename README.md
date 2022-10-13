@@ -1,5 +1,5 @@
 # GrassVM
-GrassVM is a programmable virtual CPU for the [Grass](http://www.blue.sky.or.jp/grass/) programming language (also see [here](https://esolangs.org/wiki/Grass)).
+GrassVM is a programmable virtual CPU for the [Grass](http://www.blue.sky.or.jp/grass/) programming language.
 
 GrassVM supports an extended version of the [ELVM](https://github.com/shinh/elvm) instruction set and architecture written by [Shinichiro Hamaji](https://github.com/shinh).
 Using GrassVM, you can enjoy writting Grass programs in assembly programming style.
